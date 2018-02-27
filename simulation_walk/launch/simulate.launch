@@ -1,0 +1,55 @@
+<launch>
+
+  <arg name="robot" default="freight"/>
+
+  <!-- Start Gazebo with a blank world
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name"  default="$(find walking_person_plugin)/world/walking_map.world"/>
+    <arg name="paused" value="false"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="true"/>
+    <arg name="headless" value="false"/>
+    <arg name="debug" value="false"/>
+  </include>
+  -->
+
+  <arg name="world_name" default="$(find walking_person_plugin)/world/walking_map.world"/>
+  <!-- <arg name="paused" value="false"/> -->
+  <arg name="use_sim_time" value="true"/>
+  <arg name="gui" value="true"/>
+  <!-- <arg name="headless" value="false"/> -->
+  <!-- <arg name="debug" value="false"/> -->
+
+  <!-- set use_sim_time flag -->
+  <group if="$(arg use_sim_time)">
+      <param name="/use_sim_time" value="true" />
+  </group>
+
+  <node name="gazebo" pkg="gazebo_ros" type="gzserver" output="screen" args="$(arg world_name)" />
+
+  <!-- start gazebo client -->
+  <group if="$(arg gui)">
+      <node name="gazebo_gui" pkg="gazebo_ros" type="gzclient" respawn="false" output="screen"/>
+  </group>
+
+  <param name="trajs" type="string" value="/home/users/lshixin/path_planning/waypoints.txt" />
+  <param name="costmap" type="string" value="/home/users/lshixin/path_planning/costmap.pkl" />
+
+  <arg name="map_file" default="/home/users/lshixin/catkin_ws/src/walking_person_plugin/world/map.yaml"/>
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
+
+  <!-- Publishes the voxel grid to rviz for display -->
+  <node pkg="costmap_2d" type="costmap_2d_markers" name="voxel_visualizer">
+    <remap from="voxel_grid" to="costmap/voxel_grid"/>
+  </node>
+
+  <!-- Run the costmap node -->
+  <node name="costmap_node" pkg="costmap_2d" type="costmap_2d_node" >
+    <rosparam file="/home/users/lshixin/catkin_ws/src/walking_person_plugin/world/costmap.yaml" command="load" ns="costmap" />
+  </node>
+
+<!-- Oh, you wanted a robot? -->
+  <param name="robot_description" textfile="$(find fetch_description)/robots/$(arg robot).urdf" />
+  <include file="$(find fetch_gazebo)/launch/include/$(arg robot).launch.xml" />
+
+</launch>
