@@ -36,7 +36,6 @@ ActorPlugin::ActorPlugin()
 /////////////////////////////////////////////////
 void ActorPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 {
-  LOG(ERROR) << "Is this what reset calls?????";
   this->sdf = _sdf;
   this->actor = boost::dynamic_pointer_cast<physics::Actor>(_model);
   this->world = this->actor->GetWorld();
@@ -97,12 +96,6 @@ void ActorPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   // this->actor->SetWorldPose(pose);
 
   this->idxOfCurrentTraj = 1;
-  // this->target = ignition::math::Vector3d(this->targets[this->idxOfCurrentTraj].first,
-  //                                         this->targets[this->idxOfCurrentTraj].second,
-  //                                         this->height);
-
-  // this->reachDest = false;
-
 }
 
 /////////////////////////////////////////////////
@@ -130,11 +123,19 @@ void ActorPlugin::Reset()
   else
     this->idx ++;
 
+  // LOG(ERROR) << "--------- the idx is: " << this->idx;
+
   std::string traj = std::to_string(this->idx);
   ignition::math::Pose3d pose = this->actor->WorldPose();
   pose.Pos().X(this->trajs[traj][0][0]);
   pose.Pos().Y(this->trajs[traj][0][1]);
   this->actor->SetWorldPose(pose, true, true);
+
+  geometry_msgs::Point posOfActor;
+  posOfActor.x = pose.Pos()[0];
+  posOfActor.y = pose.Pos()[1];
+  posOfActor.z = pose.Pos()[2];
+  this->posPublisher.publish(posOfActor);
   this->idxOfCurrentTraj = 1;
 
   this->targets.clear();
@@ -152,7 +153,6 @@ void ActorPlugin::Reset()
   msg.y = this->target[1];
   msg.z = this->target[2];
   this->newStartPublisher.publish(msg);
-  LOG(ERROR) << "here";
 
   auto skelAnims = this->actor->SkeletonAnimations();
   if (skelAnims.find(WALKING_ANIMATION) == skelAnims.end())
@@ -177,20 +177,17 @@ void ActorPlugin::ChooseNewTarget()
     std_msgs::Bool msg;
     msg.data = true;
     this->reachDestPublisher.publish(msg);
-    this->targets.clear();
+    // this->targets.clear();
 
-    this->Reset();
-
-    // LOG(ERROR) << ">>>>>>>>>>>" << this->actor->WorldPose();
-    // this->actor->SetWorldPose(pose, true, true);
-
-    // LOG(ERROR) << "<<<<<<<<<<<" << this->actor->WorldPose();
-    this->idxOfCurrentTraj = 0;
-  } else this->idxOfCurrentTraj ++;
-
-  this->target = ignition::math::Vector3d(this->targets[this->idxOfCurrentTraj].first,
+    // No need to call reset here (Never!!!)
+    // world plugin will call reset!
+    // this->Reset();
+  } else {
+    this->idxOfCurrentTraj ++;
+    this->target = ignition::math::Vector3d(this->targets[this->idxOfCurrentTraj].first,
                                           this->targets[this->idxOfCurrentTraj].second,
                                           this->height);
+  }
 
   // if (this->idxOfCurrentTraj == 1) {
   //   std_msgs::Bool msg;

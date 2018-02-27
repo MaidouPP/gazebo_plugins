@@ -70,7 +70,7 @@ namespace gazebo
     }
 
   public: void callback(const std_msgs::Bool::ConstPtr& msg) {
-    LOG(ERROR) << "here?";
+    // LOG(ERROR) << "here?";
     this->world->ResetEntities(gazebo::physics::Base::ACTOR);
   }
    
