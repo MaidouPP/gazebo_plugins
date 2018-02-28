@@ -15,7 +15,7 @@
  *
 */
 #include <sdf/sdf.hh>
-#include <ignition/math/Pose3.hh>
+#include <ignition/math.hh>
 #include <std_msgs/Bool.h>
 #include <ros/ros.h>
 #include "gazebo/gazebo.hh"
@@ -25,6 +25,7 @@
 #include "gazebo/physics/Base.hh"
 #include "gazebo/transport/transport.hh"
 #include <glog/logging.h>
+#include <geometry_msgs/Point.h>
 
 /// \example examples/plugins/world_edit.cc
 /// This example creates a WorldPlugin, initializes the Transport system by
@@ -37,6 +38,7 @@ namespace gazebo
     ros::NodeHandlePtr rosNode;
     ros::Subscriber subReset;
     physics::WorldPtr world;
+    // ros::Publisher robotPose;
 
     public: void Load(physics::WorldPtr _parent, sdf::ElementPtr _sdf)
     {
@@ -50,23 +52,22 @@ namespace gazebo
       // Initialize the node with the world name
       // rosNode->Init(_parent->Name());
 
+      // this->robotPose = this->rosNode->advertise<geometry_msgs::Point>("/actor_pose", 10);
       this->subReset = this->rosNode->subscribe("/reach_dest", 10, &WorldResetPlugin::callback, this);
 
-      // // Create a publisher on the ~/physics topic
-      // transport::PublisherPtr physicsPub =
-      //   node->Advertise<msgs::Physics>("~/physics");
+      // ros::Rate loop_rate(20);
 
-      // msgs::Physics physicsMsg;
-      // physicsMsg.set_type(msgs::Physics::ODE);
+      // gazebo::physics::EntityPtr ptr  = this->world->EntityByName("actor1");
+      // while (ros::ok()) {
+      //   geometry_msgs::Point posOfActor;
+      //   ignition::math::Pose3d pose = ptr->WorldPose();
+      //   posOfActor.x = pose.Pos()[0];
+      //   posOfActor.y = pose.Pos()[1];
+      //   posOfActor.z = pose.Pos()[2];
+      //   this->robotPose.publish(posOfActor);
 
-      // // Set the step time
-      // physicsMsg.set_max_step_size(0.01);
-
-      // // Change gravity
-      // msgs::Set(physicsMsg.mutable_gravity(),
-      //     ignition::math::Vector3d(0.01, 0, 0.1));
-      // physicsPub->Publish(physicsMsg);
-      // ros::spin();
+      //   loop_rate.sleep();
+      // }
     }
 
   public: void callback(const std_msgs::Bool::ConstPtr& msg) {

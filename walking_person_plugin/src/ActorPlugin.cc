@@ -45,6 +45,7 @@ void ActorPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 
   ignition::math::Pose3d pose = this->actor->WorldPose();
 
+  // LOG(ERROR) << _model->GetName() << " ===========";
   // Read in the target weight
   if (_sdf->HasElement("target_weight"))
     this->targetWeight = _sdf->Get<double>("target_weight");
@@ -71,6 +72,7 @@ void ActorPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   this->posPublisher = this->rosNode->advertise<geometry_msgs::Point>("/actor_pos", 100);
   this->reachDestPublisher = this->rosNode->advertise<std_msgs::Bool>("/reach_dest", 100);
   this->newStartPublisher = this->rosNode->advertise<geometry_msgs::Point>("/new_start", 100);
+  this->targetPublisher = this->rosNode->advertise<geometry_msgs::Point>("/actor_target", 100);
 
   // Read in the other obstacles to ignore
   if (_sdf->HasElement("ignore_obstacles"))
@@ -147,6 +149,11 @@ void ActorPlugin::Reset()
   this->target = ignition::math::Vector3d(this->targets[this->idxOfCurrentTraj].first,
                                           this->targets[this->idxOfCurrentTraj].second,
                                           this->height);
+  geometry_msgs::Point targetOfActor;
+  targetOfActor.x = this->target[0];
+  targetOfActor.y = this->target[1];
+  targetOfActor.z = this->target[2];
+  this->targetPublisher.publish(targetOfActor);
 
   geometry_msgs::Point msg;
   msg.x =  this->target[0];
@@ -187,6 +194,11 @@ void ActorPlugin::ChooseNewTarget()
     this->target = ignition::math::Vector3d(this->targets[this->idxOfCurrentTraj].first,
                                           this->targets[this->idxOfCurrentTraj].second,
                                           this->height);
+    geometry_msgs::Point targetOfActor;
+    targetOfActor.x = this->target[0];
+    targetOfActor.y = this->target[1];
+    targetOfActor.z = this->target[2];
+    this->targetPublisher.publish(targetOfActor);
   }
 
   // if (this->idxOfCurrentTraj == 1) {
@@ -279,9 +291,6 @@ void ActorPlugin::OnUpdate(const common::UpdateInfo &_info)
 
   // Normalize the direction vector, and apply the target weight
   pos = pos.Normalize() * this->targetWeight;
-
-  // Adjust the direction vector by avoiding obstacles
-  // this->HandleObstacles(pos);
 
   // Compute the yaw orientation
   ignition::math::Angle yaw = atan2(pos.Y(), pos.X()) + 1.5707 - rpy.Z();

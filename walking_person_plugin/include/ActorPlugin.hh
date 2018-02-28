@@ -116,6 +116,7 @@ namespace gazebo
     ros::Publisher posPublisher;
     ros::Publisher reachDestPublisher;
     ros::Publisher newStartPublisher;
+    ros::Publisher targetPublisher;
   };
 }
 #endif
