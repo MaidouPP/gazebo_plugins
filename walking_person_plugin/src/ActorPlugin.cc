@@ -200,36 +200,6 @@ void ActorPlugin::ChooseNewTarget()
     targetOfActor.z = this->target[2];
     this->targetPublisher.publish(targetOfActor);
   }
-
-  // if (this->idxOfCurrentTraj == 1) {
-  //   std_msgs::Bool msg;
-  //   msg.data = false;
-  //   this->reachDestPublisher.publish(msg);
-
-  //   // tell the robot new start point to make it prepare
-  //   geometry_msgs::Point posOfStart;
-  //   posOfStart.x = this->target[0];
-  //   posOfStart.y = this->target[1];
-  //   posOfStart.z = this->target[2];
-
-  //   this->newStartPublisher.publish(posOfStart);
-  // }
-
-    // this->idxOfCurrentTraj = 0;
-
-    // newTarget.X(ignition::math::Rand::DblUniform(-3, 3.5));
-    // newTarget.Y(ignition::math::Rand::DblUniform(-10, 2));
-
-    // for (unsigned int i = 0; i < this->world->ModelCount(); ++i)
-    // {
-    //   double dist = (this->world->ModelByIndex(i)->WorldPose().Pos()
-    //       - newTarget).Length();
-    //   if (dist < 2.0)
-    //   {
-    //     newTarget = this->target;
-    //     break;
-    //   }
-    // }
 }
 
 /////////////////////////////////////////////////

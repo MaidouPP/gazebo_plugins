@@ -37,6 +37,7 @@ namespace gazebo
   public:
     ros::NodeHandlePtr rosNode;
     ros::Subscriber subReset;
+    ros::Subscriber subFail;
     physics::WorldPtr world;
     // ros::Publisher robotPose;
 
@@ -53,7 +54,8 @@ namespace gazebo
       // rosNode->Init(_parent->Name());
 
       // this->robotPose = this->rosNode->advertise<geometry_msgs::Point>("/actor_pose", 10);
-      this->subReset = this->rosNode->subscribe("/reach_dest", 10, &WorldResetPlugin::callback, this);
+      this->subReset = this->rosNode->subscribe("/reach_dest", 10, &WorldResetPlugin::callbackRest, this);
+      this->subFail = this->rosNode->subscribe("/bump", 10, &WorldResetPlugin::callbackFail, this);
 
       // ros::Rate loop_rate(20);
 
@@ -72,6 +74,11 @@ namespace gazebo
 
   public: void callback(const std_msgs::Bool::ConstPtr& msg) {
     // LOG(ERROR) << "here?";
+    this->world->ResetEntities(gazebo::physics::Base::ACTOR);
+  }
+
+  public: void callback(const std_msgs::Bool::ConstPtr& msg) {
+    LOG(ERROR) << "here?";
     this->world->ResetEntities(gazebo::physics::Base::ACTOR);
   }
    
