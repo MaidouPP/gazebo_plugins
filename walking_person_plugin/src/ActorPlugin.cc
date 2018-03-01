@@ -125,19 +125,17 @@ void ActorPlugin::Reset()
   else
     this->idx ++;
 
-  // LOG(ERROR) << "--------- the idx is: " << this->idx;
-
   std::string traj = std::to_string(this->idx);
   ignition::math::Pose3d pose = this->actor->WorldPose();
   pose.Pos().X(this->trajs[traj][0][0]);
   pose.Pos().Y(this->trajs[traj][0][1]);
   this->actor->SetWorldPose(pose, true, true);
 
-  geometry_msgs::Point posOfActor;
-  posOfActor.x = pose.Pos()[0];
-  posOfActor.y = pose.Pos()[1];
-  posOfActor.z = pose.Pos()[2];
-  this->posPublisher.publish(posOfActor);
+  // geometry_msgs::Point posOfActor;
+  // posOfActor.x = pose.Pos()[0];
+  // posOfActor.y = pose.Pos()[1];
+  // posOfActor.z = pose.Pos()[2];
+  // this->posPublisher.publish(posOfActor);
   this->idxOfCurrentTraj = 1;
 
   this->targets.clear();
@@ -149,12 +147,22 @@ void ActorPlugin::Reset()
   this->target = ignition::math::Vector3d(this->targets[this->idxOfCurrentTraj].first,
                                           this->targets[this->idxOfCurrentTraj].second,
                                           this->height);
+
+  // publish the pose of the actor
+  geometry_msgs::Point posOfActor;
+  posOfActor.x = pose.Pos()[0];
+  posOfActor.y = pose.Pos()[1];
+  posOfActor.z = pose.Pos()[2];
+  this->posPublisher.publish(posOfActor);
+
+  // publish the new target of the actor
   geometry_msgs::Point targetOfActor;
   targetOfActor.x = this->target[0];
   targetOfActor.y = this->target[1];
   targetOfActor.z = this->target[2];
   this->targetPublisher.publish(targetOfActor);
 
+  // publish the new start message
   geometry_msgs::Point msg;
   msg.x =  this->target[0];
   msg.y = this->target[1];

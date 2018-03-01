@@ -23,6 +23,8 @@ class TrainingDataCollector:
             "/new_start", Point, self._gazebo_callback_new_start)
         self._sub_end_traj = rospy.Subscriber(
             "/reach_dest", Bool, self._gazebo_callback_end_traj)
+        self._sub_end_traj = rospy.Subscriber(
+            "/bump", Bool, self._gazebo_callback_bump)
 
     def laser_callback(self, data):
         # rospy.loginfo(rospy.get_caller_id() + "I heard %s", data.header)
@@ -46,6 +48,11 @@ class TrainingDataCollector:
 
     def _gazebo_callback_new_start(self, data):
         self._ready = True
+
+    def _gazebo_callback_bump(self, data):
+        self._ready = False
+        self._training_laser_scan_msg = Laser4()
+
 
 if __name__ == '__main__':
     collector = TrainingDataCollector()
