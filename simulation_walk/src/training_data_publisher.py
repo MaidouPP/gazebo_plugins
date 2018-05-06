@@ -2,8 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import rospy
+import matplotlib.pyplot as plt
+import numpy as np
+import math
 from sensor_msgs.msg import LaserScan
-from simulation_walk.msg import Laser4
+from simulation_walk.msg import Laser4, CostMap
 from std_msgs.msg import Bool
 from geometry_msgs.msg import Point
 
@@ -17,8 +20,13 @@ class TrainingDataCollector:
         self._training_laser_scan_msg.depth = 4
         self._training_laser_scan_msg.length = 662
         self._ready = False
+
+        self._training_grid_msg = CostMap()
+        self._len_map = 100
+        self._resol = 0.05
+
         self._publisher = rospy.Publisher(
-            "simulation_walk/laser4", Laser4, queue_size=10)
+            "simulation_walk/costmap", CostMap, queue_size=10)
         self._sub_new_start = rospy.Subscriber(
             "/new_start", Point, self._gazebo_callback_new_start)
         self._sub_end_traj = rospy.Subscriber(
@@ -26,15 +34,42 @@ class TrainingDataCollector:
         self._sub_end_traj = rospy.Subscriber(
             "/bump", Bool, self._gazebo_callback_bump)
 
+        self._progress = 0
+
+    def _prepare_costmap(self, data):
+        costmap = np.zeros((self._len_map**2))
+        for i in xrange(len(list(data.ranges))):
+            if data.ranges[i] > data.range_min and data.ranges[i] < data.range_max:
+                x = data.ranges[i] * math.cos(data.angle_min
+                                            + i * data.angle_increment)
+                y = data.ranges[i] * math.sin(data.angle_min
+                                            + i * data.angle_increment)
+
+                x = int(round(float(x)/self._resol + self._len_map/2))
+                y = int(round(float(y)/self._resol + self._len_map/2))
+
+                if x >= 0 and x < self._len_map and y >= 0 and y < self._len_map:
+                    costmap[x + self._len_map * y] = 1
+        return costmap
+
     def laser_callback(self, data):
         # rospy.loginfo(rospy.get_caller_id() + "I heard %s", data.header)
         if self._ready:
-            self._training_laser_scan_msg.ranges.extend(list(data.ranges))
+            self._training_grid_msg.data.extend(list(self._prepare_costmap(data)))
             # print len(self._training_laser_scan_msg.ranges)
-            if (len(self._training_laser_scan_msg.ranges) ==
-                    self._depth * self._length):
-                self._publisher.publish(self._training_laser_scan_msg)
-                self._training_laser_scan_msg.ranges[:] = []
+            if (len(self._training_grid_msg.data) ==
+                    self._len_map**2):
+                self._publisher.publish(self._training_grid_msg)
+
+                # self._progress += 1
+                # if self._progress == 6:
+                #     tmp = np.array(self._training_grid_msg.data[0:self._len_map**2])
+                #     tmp = tmp.reshape((self._len_map, self._len_map))
+                #     plt.imshow(tmp)
+                #     plt.show(block=False)
+                #     print "Finished one update of visualization"
+                #     self._progress = 0
+                self._training_grid_msg.data[:] = []
 
     def listner(self):
         rospy.init_node('listener', anonymous=True)
