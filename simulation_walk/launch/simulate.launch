@@ -35,9 +35,6 @@
   <param name="trajs" type="string" value="/home/users/lshixin/path_planning/waypoints.txt" />
   <param name="costmap" type="string" value="/home/users/lshixin/path_planning/costmap.pkl" />
 
-  <arg name="map_file" default="/home/users/lshixin/catkin_ws/src/walking_person_plugin/world/map.yaml"/>
-  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
-
   <!-- Publishes the voxel grid to rviz for display -->
   <!-- <node pkg="costmap_2d" type="costmap_2d_markers" name="voxel_visualizer"> -->
   <!--   <remap from="voxel_grid" to="costmap/voxel_grid"/> -->
@@ -48,7 +45,6 @@
   <!--   <rosparam file="/home/users/lshixin/catkin_ws/src/walking_person_plugin/world/costmap.yaml" command="load" ns="costmap" /> -->
   <!-- </node> -->
 
-  <node name="training_data_publisher" pkg="simulation_walk" type="training_data_publisher.py" />
   <!-- <node name="action_publisher" pkg="robot_follower" type="action_publisher.py" /> -->
 
 <!-- Oh, you wanted a robot? -->

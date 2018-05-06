@@ -50,6 +50,7 @@ add_message_files(
   DIRECTORY msg
   FILES
     Laser4.msg
+    CostMap.msg
 )
 
 ## Generate services in the 'srv' folder

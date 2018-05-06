@@ -5,6 +5,7 @@ import rospy
 import matplotlib.pyplot as plt
 import numpy as np
 import math
+import time
 from sensor_msgs.msg import LaserScan
 from simulation_walk.msg import Laser4, CostMap
 from std_msgs.msg import Bool
@@ -55,10 +56,14 @@ class TrainingDataCollector:
     def laser_callback(self, data):
         # rospy.loginfo(rospy.get_caller_id() + "I heard %s", data.header)
         if self._ready:
+#            start = time.time()
             self._training_grid_msg.data.extend(list(self._prepare_costmap(data)))
+#            done = time.time()
+#            elapsed = done - start
+#            print "for preparing costmap: ", elapsed
             # print len(self._training_laser_scan_msg.ranges)
             if (len(self._training_grid_msg.data) ==
-                    self._len_map**2):
+                    self._len_map**2*self._depth):
                 self._publisher.publish(self._training_grid_msg)
 
                 # self._progress += 1
